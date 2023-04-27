@@ -20,6 +20,11 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.slack.api</groupId>
+            <artifactId>slack-api-client</artifactId>
+            <version>1.29.2</version>
+        </dependency>
     </dependencies>
 
     <build>
