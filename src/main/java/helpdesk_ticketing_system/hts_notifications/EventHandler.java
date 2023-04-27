@@ -27,6 +27,27 @@ public class EventHandler implements RequestHandler<Map<String,Object>,Object> {
                     message = String.format("New Issue Raised with ID : %s",inputEvent.get("issue_id"));
                     channelID = Channels.getChannelID(Channel.HELPDESK);
                     break;
+                case TICKET_RAISED:
+                    context.getLogger().log("In TICKET_RAISED event case");
+                    // getting the department enum for dept name that was sent in event
+                    // this is the dept for whom the ticket was raised
+                    Department.DepartmentTypes departmentType = Department.DepartmentTypes.valueOf(
+                            String.valueOf(inputEvent.get("assigned_to")).toUpperCase()
+                    );
+
+                    // getting the channel name for that department
+                    Channel channel = Department.getDepartmentChannel(departmentType);
+
+                    // getting the channel ID
+                    if(channel!=null)
+                        channelID = Channels.getChannelID(channel);
+                    else
+                    {
+                        context.getLogger().log("Channel not found for " + departmentType + "\n");
+                        break;
+                    }
+                    message = String.format("New Ticket Raised with ID : %s",inputEvent.get("ticket_id"));
+                    break;
             }// end switch block
 
             if(message!=null && channelID!=null && slackClient.sendMessage(message,channelID,context))
