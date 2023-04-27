@@ -1,0 +1,5 @@
+{
+  "event-type": "TICKET_RAISED",
+  "ticket_id": "TIC_123_test",
+  "assigned_to": "EXAM_Cell"
+}
