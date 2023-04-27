@@ -2,15 +2,20 @@ package helpdesk_ticketing_system.hts_notifications;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import jakarta.mail.MessagingException;
 
 import java.net.HttpURLConnection;
 import java.util.Map;
 
 public class EventHandler implements RequestHandler<Map<String,Object>,Object> {
     private final SlackClient slackClient;
+    private final EmailSender emailSender;
+    private final UserNotificationEmailTemplate userNotificationEmailTemplate;
 
     public EventHandler() {
         slackClient = new SlackClient();
+        emailSender = new EmailSender();
+        userNotificationEmailTemplate = new UserNotificationEmailTemplate();
     }
 
     @Override
@@ -48,6 +53,26 @@ public class EventHandler implements RequestHandler<Map<String,Object>,Object> {
                     }
                     message = String.format("New Ticket Raised with ID : %s",inputEvent.get("ticket_id"));
                     break;
+                case RESOLVED:
+                    context.getLogger().log("In RESOLVED event case");
+                    String notificationRecipient = String.valueOf(inputEvent.get("submitted_by"));
+                    String issueId = String.valueOf(inputEvent.get("issue_id"));
+                    String subject = "ISSUE RESOLVED";
+                    String bodyTemplate = userNotificationEmailTemplate.getTemplateFor(Event.RESOLVED);
+                    String messageBody = String.format(
+                            bodyTemplate,
+                            notificationRecipient,
+                            issueId,
+                            System.getenv("app_name")
+                    );
+                    try{
+                        emailSender.sendEmail(notificationRecipient,subject, messageBody);
+                        return HttpURLConnection.HTTP_OK;
+                    }catch (MessagingException e){
+                        context.getLogger().log("Exception thrown in : " + this.getClass().getName() + "\n");
+                        context.getLogger().log("Exception class : " + e.getClass().getName() + "\n");
+                        context.getLogger().log("Exception message : " + e.getMessage() + "\n");
+                    }
             }// end switch block
 
             if(message!=null && channelID!=null && slackClient.sendMessage(message,channelID,context))
