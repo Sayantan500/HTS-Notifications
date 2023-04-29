@@ -14,7 +14,7 @@ class UserNotificationEmailTemplate
         switch(notificationType){
             case RESOLVED:
                 // read template from file if never read before
-                if(emailBodyTemplate.isEmpty())
+                if(emailBodyTemplate==null || emailBodyTemplate.isEmpty())
                 {
                     ClassLoader classLoader = this.getClass().getClassLoader();
                     URL fileUrl = classLoader.getResource("issueResolvedEmailTemplate.html");
