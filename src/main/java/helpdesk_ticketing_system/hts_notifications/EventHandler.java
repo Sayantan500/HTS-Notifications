@@ -11,11 +11,13 @@ public class EventHandler implements RequestHandler<Map<String,Object>,Object> {
     private final SlackClient slackClient;
     private final EmailSender emailSender;
     private final UserNotificationEmailTemplate userNotificationEmailTemplate;
+    private final MongoDb mongoDb;
 
     public EventHandler() {
         slackClient = new SlackClient();
         emailSender = new EmailSender();
         userNotificationEmailTemplate = new UserNotificationEmailTemplate();
+        mongoDb = new MongoDb();
     }
 
     @Override
@@ -55,8 +57,9 @@ public class EventHandler implements RequestHandler<Map<String,Object>,Object> {
                     break;
                 case RESOLVED:
                     context.getLogger().log("In RESOLVED event case");
-                    String notificationRecipient = String.valueOf(inputEvent.get("submitted_by"));
+
                     String issueId = String.valueOf(inputEvent.get("issue_id"));
+                    String notificationRecipient = mongoDb.getSubmitterOfIssue(issueId,context);
                     String subject = "ISSUE RESOLVED";
                     String bodyTemplate = userNotificationEmailTemplate.getTemplateFor(Event.RESOLVED);
                     String messageBody = String.format(
