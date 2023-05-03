@@ -10,6 +10,8 @@ public class Channels {
                 return System.getenv("channel_id_accounts");
             case EXAM_CELL:
                 return System.getenv("channel_id_exam_cell");
+            case TNP:
+                return System.getenv("channel_id_tnp");
         }
         return null;
     }
